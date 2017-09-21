@@ -49,6 +49,7 @@ for iteration = iteration_range
     energy_validation(iteration) = energy_function(validation_target, validation_input, weights, biase);
     weights(1,1) = weights(1,1) + update_weights(1,1,training_target(i), prediction, weights, training_input(i,:), biase);
     weights(2,1) = weights(2,1) + update_weights(1,2,training_target(i), prediction, weights, training_input(i,:), biase);
+    biase = biase + update_biase(1,1,training_target(i), prediction, weights, training_input(i,:), biase);
     one_it = toc;
 end
 train_error = class_error(training_target, training_input, weights, biase)
@@ -91,11 +92,18 @@ function H = energy_function(target, input, weights, biase)
     H = summa/2;
 end
 
+function b = update_biase(output_index, input_index, target, predicted, weights, input, biase)
+    learning_rate = 0.02;
+    beta = 1/2;
+    
+    b = learning_rate*((target - predicted))*sech(beta*input*weights - biase)^2 * beta;
+end
+
 function W = update_weights(output_index, input_index, target, predicted, weights, input, biase)
     learning_rate = 0.02;
     beta = 1/2;
     
-    W = learning_rate*((target - predicted)*input(input_index))*sech(beta*input*weights)*beta;
+    W = learning_rate*((target - predicted))*sech(beta*input*weights - biase)^2 * beta * input(:, input_index) * input(:, input_index);
 
     %W =(target(output_index)-predicted(output_index))*weights(input_index, output_index)*input(:,input_index);
 end
