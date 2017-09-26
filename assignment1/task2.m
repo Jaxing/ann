@@ -11,7 +11,6 @@ function main()
     p = 40;
     beta = 50;
     patterns = generate_n_random_patterns(N, p);
-    %time_steps = 100:1:1000;
     time_steps = 0:1000;
     weights_prim = weights(patterns);
     pattern = patterns(:, 1);
@@ -19,38 +18,14 @@ function main()
     result = zeros(1, length(time_steps));
     i = 1;
     for t=time_steps
-        %time = t-100;
-        %res = travaling_mean(time, t, pattern, prev_state, beta, weights_prim);
-        %result(i) = res;
-        %prev_state = update_all(N, beta, prev_state, weights_prim);
-        %------
+        
         res = order_parameter(pattern, prev_state, beta, weights_prim);
         result(i) = res{1,1};
         prev_state = res{1,2};
-        %------
-        %state = zeros(length(pattern), 1);
         
-        %for j=1:N
-        %    state(j) = update(beta, j, prev_state, weights_prim);
-        %    result(i+j-1) = state(j)*pattern(j);
-        %end
-        %prev_state = state;
         i = i + 1;
     end
     plot(time_steps, result)
-end
-
-function f  = travaling_mean(start_time, end_time, fed_pattern, prev_state, beta, weights)
-    summa = 0;
-
-    for t = start_time:end_time
-        res = order_parameter(fed_pattern, prev_state, beta, weights);
-        m = res{1,1};
-        summa = summa + m;
-        prev_state = res{1,2};
-    end
-    
-    f = summa/(end_time - start_time);
 end
 
 function m = order_parameter(fed_pattern, prev_state, beta, weights)
@@ -63,14 +38,6 @@ function m = order_parameter(fed_pattern, prev_state, beta, weights)
         summa = summa + state(i) * fed_pattern(i);
     end
     m = {summa/N, state};
-end
-
-function s = update_all(N, beta, prev_state, weights_prime)
-    state = prev_state;
-    for i = 1:N
-        state(i) = update(beta, i, prev_state, weights_prime);
-    end
-    s = state;
 end
 
 function s = update(beta, index, prev_state, weights_prime)

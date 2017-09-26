@@ -25,6 +25,10 @@ validation_input(:,2) = (validation_input(:,2)-average(2))/sqrt(variance(2));
 
 %------- Implemention below
 
+train_error = zeros(1,10)
+val_error = zeros(1,10)
+for lolipop=1:10
+lolipop
 learning_rate = 0.02;
 beta = 1/2;
 
@@ -35,11 +39,9 @@ energy_train = zeros(1,10^3);
 energy_validation = zeros(1,10^3);
 iteration_range = 1:10^6;
 
-train_error = class_error(training_target, training_input, weights, biase)
-val_error = class_error(validation_target, validation_input, weights, biase)
 l = 1;
 for iteration = iteration_range
-    tic
+    
     i = mod(iteration, length(training_target));
     if i == 0
         i = length(training_target);
@@ -51,13 +53,10 @@ for iteration = iteration_range
         l = l + 1;
     end
     weights = weights + update_all_weights(training_target(i), prediction, weights, training_input(i,:), biase);
-    %weights(1,1) = weights(1,1) + update_weights(1,1,training_target(i), prediction, weights, training_input(i,:), biase);
-    %weights(2,1) = weights(2,1) + update_weights(1,2,training_target(i), prediction, weights, training_input(i,:), biase);
     biase = biase + update_biase(training_target(i), prediction, weights, training_input(i,:), biase);
-    one_it = toc;
 end
-train_error = class_error(training_target, training_input, weights, biase)
-val_error = class_error(validation_target, validation_input, weights, biase)
+train_error(lolipop) = class_error(training_target, training_input, weights, biase)
+val_error(lolipop) = class_error(validation_target, validation_input, weights, biase)
 
 
 hold on
@@ -65,7 +64,14 @@ plot(1:10^3, energy_train);
 plot(1:10^3, energy_validation);
 xlabel('iterations')
 ylabel('energy')
+end
+avg_err_train = mean(train_error)
+min_err_train = min(train_error)
+var_err_train = var(train_error)
 
+avg_err_val = mean(val_error)
+min_err_val = min(val_error)
+var_err_val = var(val_error)
 function c = class_error(targets, inputs, weights, biase)
     p = length(targets);
     summa = 0;
@@ -98,15 +104,6 @@ function b = update_biase(target, predicted, weights, input, biase)
     beta = 1/2;
     
     b = learning_rate*((target - predicted))*(-sech(beta*input*weights - biase)^2 * beta);
-end
-
-function W = update_weights(output_index, input_index, target, predicted, weights, input, biase)
-    learning_rate = 0.02;
-    beta = 1/2;
-    
-    W = learning_rate*((target - predicted))* sech(beta*input*weights)^2 * beta * input(:, input_index);
-
-    %W =(target(output_index)-predicted(output_index))*weights(input_index, output_index)*input(:,input_index);
 end
 
 function W = update_all_weights(target, predicted, weights, input, biase)
