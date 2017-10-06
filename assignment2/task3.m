@@ -6,12 +6,12 @@ class_one = (input_comp(find(target_values == 1),:));
 class_two = (input_comp(find(target_values == -1),:));
 
 hold on
-scatter(class_one(:,1),class_one(:,2),'y');
-scatter(class_two(:,1),class_two(:,2),'g');
+scatter(class_one(:,1),class_one(:,2),'rx');
+scatter(class_two(:,1),class_two(:,2),'gx');
 
 
 %------ Network implemntation begins here.
-k = 10;
+k = 4;
 
 class_errors = zeros(1,20);
 wc = zeros(k,2);
@@ -39,7 +39,7 @@ for j=1:20
         delta_comp_weights = update_weights(pattern, weights_comp(i_0, :));
         weights_comp(i_0, :) = weights_comp(i_0, :) + delta_comp_weights;
     end
-    plot(weights_comp(:,1),weights_comp(:,2), 'ko');
+    plot(weights_comp(:,1),weights_comp(:,2), 'ko', 'MarkerFaceColor', 'k');
     drawnow
     %------ Compute input to supervised network
     input_sup = zeros(length(target_values), k);
@@ -61,16 +61,17 @@ for j=1:20
         end
         rand_index = randi(length(input_sup));
         pattern = input_sup(rand_index,:);
+        target = target_values(rand_index);
         prediction = predict(pattern, weights_sup, biase);
         
         
-        delta_weights = update_all_weights(target_values(i), prediction, weights_sup, pattern, biase);
-        delta_biase = update_biase(target_values(i), prediction, weights_sup, pattern, biase);
+        delta_weights = update_all_weights(target, prediction, weights_sup, pattern, biase);
+        delta_biase = update_biase(target, prediction, weights_sup, pattern, biase);
         
         weights_sup = weights_sup + delta_weights;
         biase = biase + delta_biase;
     end
-    plot(weights_sup(:, 1) - biase, weights_sup(:, 2) - biase, 'bo')
+    plot(weights_sup(:, 1) - biase, weights_sup(:, 2) - biase, 'bo',  'MarkerFaceColor', 'b')
     drawnow
     ce = class_error(target_values, input_comp, weights_comp, weights_sup, biase)
     class_errors(j) = ce;
@@ -156,7 +157,7 @@ function c = class_error(targets, patterns, weights_comp, weights_sup, biase)
     for i=1:p
         pattern = patterns(i, :);
         weights_comp;
-        prediction_comp = activation_comp(pattern, weights_comp);
+        prediction_comp = activation_comp(pattern, weights_comp)
         weights_sup;
         biase;
 
