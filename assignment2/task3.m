@@ -6,13 +6,13 @@ class_one = (input_comp(find(target_values == 1),:));
 class_two = (input_comp(find(target_values == -1),:));
 
 hold on
-scatter(class_one(:,1),class_one(:,2),'rx');
-scatter(class_two(:,1),class_two(:,2),'gx');
+scatter(class_one(:,1),class_one(:,2),'ro', 'MarkerFaceColor', 'r');
+scatter(class_two(:,1),class_two(:,2),'go', 'MarkerFaceColor', 'g');
 
 
 %------ Network implemntation begins here.
-k = 4;
-
+k = 10;
+%for k = 1:50
 class_errors = zeros(1,20);
 wc = zeros(k,2);
 ws = zeros(1, k);
@@ -39,8 +39,7 @@ for j=1:20
         delta_comp_weights = update_weights(pattern, weights_comp(i_0, :));
         weights_comp(i_0, :) = weights_comp(i_0, :) + delta_comp_weights;
     end
-    plot(weights_comp(:,1),weights_comp(:,2), 'ko', 'MarkerFaceColor', 'k');
-    drawnow
+    
     %------ Compute input to supervised network
     input_sup = zeros(length(target_values), k);
     for i = 1:length(target_values)
@@ -50,7 +49,6 @@ for j=1:20
     end
 
     biase =  2 * rand - 1;
-    %biase = 0;
     weights_sup = 2 * rand(1, k) - 1;
     input_sup;
     %------- Train supervised network
@@ -71,9 +69,8 @@ for j=1:20
         weights_sup = weights_sup + delta_weights;
         biase = biase + delta_biase;
     end
-    plot(weights_sup(:, 1) - biase, weights_sup(:, 2) - biase, 'bo',  'MarkerFaceColor', 'b')
-    drawnow
-    ce = class_error(target_values, input_comp, weights_comp, weights_sup, biase)
+    
+    ce = class_error(target_values, input_comp, weights_comp, weights_sup, biase);
     class_errors(j) = ce;
     if min_error > ce 
         min_error = ce;
@@ -82,8 +79,12 @@ for j=1:20
         b  = biase;
     end
 end
+plot(weights_comp(:,1),weights_comp(:,2), 'ko', 'MarkerFaceColor', 'k');
+%k
 avg_class_error = mean(class_errors)
-
+%bar(k, avg_class_error)
+%drawnow
+%end
 x_range = -15:0.01:25;
 y_range = -10:0.01:15;
 
@@ -96,9 +97,9 @@ for i=1:10000
     prediction_sup = predict(prediction_comp, ws, b);
     
     if sign(prediction_sup) > 0
-        plot(pattern(1), pattern(2), 'yo');
+        plot(pattern(1), pattern(2), 'r.');
     else
-        plot(pattern(1), pattern(2), 'go');
+        plot(pattern(1), pattern(2), 'g.');
     end
     drawnow
 end
@@ -111,14 +112,13 @@ end
 
 function b = update_biase(target, predicted, weights, input, biase)
     learning_rate = 0.1;
-    beta = 1/2;
+    
     g_prime = derivative_activation(input * weights.' - biase);
     b = learning_rate*(target - predicted)* -g_prime;
 end
 
 function W = update_all_weights(target, predicted, weights, input, biase)
     learning_rate = 0.1;
-    beta = 1/2;
     
     g_prime = derivative_activation(input * weights.' - biase);
     delta_error = (target - predicted) * g_prime;
@@ -151,15 +151,10 @@ end
 function c = class_error(targets, patterns, weights_comp, weights_sup, biase)
     p = length(targets);
     summa = 0;
-   
-    patterns;
     
     for i=1:p
         pattern = patterns(i, :);
-        weights_comp;
-        prediction_comp = activation_comp(pattern, weights_comp)
-        weights_sup;
-        biase;
+        prediction_comp = activation_comp(pattern, weights_comp);
 
         prediction_sup = predict(prediction_comp, weights_sup, biase);
         
